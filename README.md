@@ -1,46 +1,48 @@
 # ai-tells
 
-A Claude skill that catches AI writing tells in any draft and rewrites them clean.
+Clip Magic's customised version of the original [`ai-tells`](https://github.com/kdgbalmer/ai-tells) skill by Kyle Balmer. It reviews drafts for possible AI writing tells and can produce a cleaner rewrite when asked. It is intended for ChatGPT, Codex, and compatible AI assistants.
 
 ## What it does
 
-Drop a draft in. The skill walks it against a catalogue of AI fingerprints (vocabulary, structure, tone, punctuation, content), scores tell-density per 100 words, and produces a clean rewrite that preserves your meaning and voice.
+Ask for an AI-tells or de-AI review and the skill checks the draft against a catalogue of possible signals across vocabulary, structure, tone, punctuation, and content. It identifies relevant wording, explains why it may contribute to generic AI texture, suggests changes, and can estimate tell density when useful.
+
+Audit is the default. The skill does not rewrite the draft unless you explicitly ask it to rewrite, clean up, or remove the identified tells. Its catalogue is guidance rather than a prohibited-word list: context and combinations of signals matter, and clear terminology or deliberate style should remain intact.
 
 The catalogue is compressed from Wikipedia's "Signs of AI writing" page plus the goblin-era 2026 update. It covers everything from Tier 1 markers like *delve*, *tapestry*, and *leverage*, through structural tells like negative parallelism ("It's not X, it's Y"), down to era-specific leaks like the OpenAI goblin family.
 
 ## Install
 
-### Option 1: Claude Project
+### Option 1: Codex skill
 
-1. Create a new Claude Project.
-2. Upload `SKILL.md` to the project's knowledge.
-3. In any conversation in that project, paste a draft and say "run AI tells on this".
+1. Create an `ai-tells` folder inside your Codex skills directory.
+2. Place `SKILL.md` inside that folder.
+3. Ask Codex to run an AI-tells review, or invoke the skill directly if your setup supports named skills.
 
-### Option 2: Claude Code / Skills
+For a standard personal installation, the resulting path is usually `~/.codex/skills/ai-tells/SKILL.md`.
 
-1. Create a folder called `ai-tells` inside your `~/.claude/skills/` directory.
-2. Download `SKILL.md` from this repo and place it inside that folder.
-3. The skill will auto-trigger on relevant prompts.
+### Option 2: ChatGPT or another compatible assistant
 
-Or just download `ai-tells.skill` from the [latest release](https://github.com/kdgbalmer/ai-tells/releases) and double-click to install.
+Add `SKILL.md` using the assistant's supported skill, project-instruction, or custom-instruction mechanism. Automatic discovery depends on the platform, but the trigger boundary described below should remain the same.
 
 ### Option 3: System prompt
 
-Paste the contents of `SKILL.md` into a system prompt or custom instructions. The catalogue alone is useful even without the formal skill mechanism.
+Paste the contents of `SKILL.md` into a system prompt or custom instructions. The catalogue can still be useful without a formal skill mechanism.
 
 ## Usage
 
-Once installed, trigger phrases include:
+The skill is intentionally narrow. Trigger phrases include:
 
-- "humanize this draft"
-- "does this sound like ChatGPT"
-- "remove the AI smell"
-- "edit this for AI tells"
-- "make this less AI-y"
+- "Check this for AI tells."
+- "Does this sound like ChatGPT?"
+- "Make this less AI-like."
+- "Run an AI-tells audit."
+- "Remove the AI smell."
+- "Humanise this draft."
+- "Is this AI-y?"
 
-Or just paste a draft and ask for feedback on the writing.
+Ordinary requests to edit, polish, proofread, improve, rewrite, or give feedback on writing should not trigger this skill unless the request also expresses concern about AI-like wording or style. This keeps it from interfering with normal copy-editing or work in an established personal or brand voice.
 
-The skill returns three blocks: an audit (every tell flagged with replacement), a density score, and a clean rewrite.
+By default, it returns an audit of the relevant tells, with the wording identified, a brief category explanation, and suggested changes. It may include a density estimate when useful. A rewritten version is optional and appears only when explicitly requested with wording such as "rewrite it", "clean it up", or "remove those tells".
 
 ## Updating
 
@@ -55,9 +57,9 @@ Never delete from the catalogue. Tells are cyclical and may return.
 
 ## Limitations
 
-- This is not an AI detector. AI detectors don't work (Stanford 2023; OpenAI shut down its own classifier). The skill assumes the input may be AI-assisted and cleans it either way.
-- It catches surface tells. It can't detect hollow thinking or missing voice. Those need a human pass.
-- It produces absence of AI style, not presence of *your* style. Pair it with a voice guide for the affirmative side.
+- This is not an AI detector and does not prove whether text was written by AI. Authorship cannot be reliably determined from these surface patterns.
+- It removes surface-level AI tells. It cannot detect hollow thinking or missing voice, and it does not create a person's voice. Those need a human pass or a genuine voice guide.
+- A listed word, punctuation mark, or structure is not automatically bad. The skill should preserve accurate terminology, language variant, deliberate phrasing, useful em dashes, humour, informality, and individual rhythm when they fit the context.
 
 ## License
 
@@ -65,7 +67,9 @@ MIT. Free to use, share, fork, modify. Attribution appreciated but not required.
 
 ## Credit
 
-Built by [Kyle Balmer](https://aiwithkyle.com) at AI with Kyle.
+This repository is Clip Magic's customised version of the original [`kdgbalmer/ai-tells`](https://github.com/kdgbalmer/ai-tells) project.
+
+The original skill was built by [Kyle Balmer](https://aiwithkyle.com) at AI with Kyle. Original author and source credit are retained here.
 
 Compressed from:
 

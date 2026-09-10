@@ -1,66 +1,76 @@
 ---
 name: ai-tells
-description: Reviews any draft for AI writing tells and produces a clean rewrite. Catches vocabulary fingerprints (delve, tapestry, leverage, robust, multifaceted, navigate, foster), structural fingerprints (negative parallelism like "It's not X, it's Y", bullet-everything, Title Case headings, adjective triads), tone fingerprints ("Great question!", "I'd be happy to help", "In conclusion"), and punctuation fingerprints (em dash overuse, knowledge-cutoff disclaimers). Use this skill whenever the user asks to humanize, de-AI, edit, polish, or sanity-check writing, including phrases like "does this sound like ChatGPT", "make this less AI", "humanize this", "edit this draft", "remove the AI smell", "is this AI-y", or "clean this up". Also trigger when the user pastes a draft and asks for feedback on the writing without naming AI specifically.
+description: Reviews drafts for AI writing tells and, when explicitly requested, produces a cleaner rewrite for ChatGPT, Codex, and compatible AI assistants. Use when the user explicitly asks for an AI-tells or de-AI review, such as "check this for AI tells", "does this sound like ChatGPT", "make this less AI-like", "run an AI-tells audit", "remove the AI smell", "humanise this draft", or "is this AI-y". Do not trigger for ordinary editing, polishing, proofreading, improving, rewriting, or writing feedback unless the user also expresses concern about AI-like wording or style.
 ---
 
 # AI tells
 
-A second-pass checker that flags AI writing tells in a draft and produces a clean rewrite. The catalogue is compressed from Wikipedia's "Signs of AI writing" page plus the goblin-era 2026 update.
+A second-pass checker that flags possible AI writing tells in a draft and can produce a cleaner rewrite when requested. It is intended for ChatGPT, Codex, and compatible AI assistants. The catalogue is compressed from Wikipedia's "Signs of AI writing" page plus the goblin-era 2026 update.
 
 ## Modes
 
 Two modes:
 
-1. **Audit.** Flag every tell, name the category, suggest a replacement. No rewrite.
-2. **Rewrite.** Produce a clean version with all tells removed, preserving meaning, intent, and voice.
+1. **Audit (default).** Identify relevant tells, quote or locate the wording, briefly explain the category, and suggest what could change. Include a density estimate when it would help. Do not rewrite the draft.
+2. **Rewrite (only when explicitly requested).** Produce a cleaner version that addresses the relevant tells while preserving meaning, intent, facts, and voice. Requests such as "rewrite it", "clean it up", or "remove those tells" activate this mode.
 
-Default to audit + rewrite unless the user asks for one mode.
+If the user asks only whether a draft sounds AI-like, return the audit. Do not treat an ordinary request to edit, polish, proofread, improve, rewrite, or give writing feedback as an AI-tells request unless the user also mentions AI-like wording or style.
+
+## Judgement and voice
+
+The catalogue is guidance, not a prohibited-word list. A listed word, punctuation mark, or structure is not automatically bad. Judge the context, frequency, clustering, and effect on the passage. Density and combinations of signals matter more than any single match.
+
+Preserve accurate technical terminology, Australian or British English, deliberate phrasing, natural contractions, dry humour, mild informality, intentional fragments or short paragraphs, genuine contrasts, and the writer's individual rhythm. Do not replace a listed word when it is the clearest or most natural choice in context.
+
+Remove generic AI texture without flattening the writer's voice. Preserve existing slang, humour, and personal quirks when they are natural and appropriate; do not manufacture Australian slang, humour, informality, or quirks to make a draft appear human.
+
+This skill is a specialised review, not a replacement for normal copy-editing or established personal or brand voice guidance. If a voice guide is supplied, follow it unless doing so would change facts or meaning.
 
 ## The catalogue
 
-Walk every category below. For each match in the input, note the exact phrase, the category, and a proposed replacement.
+Use the categories below to inspect the draft. Report only contextually relevant matches. For each one, identify the wording, explain why it contributes to AI-like texture in this passage, and suggest a change or direction. Do not mechanically report or replace every catalogue match.
 
 ### Vocabulary tells
 
-These words appear at AI-anomalous frequency in machine-generated text. Replace with plainer alternatives unless context absolutely demands them.
+These words may appear at unusually high frequency in machine-generated text. Treat repetition, vagueness, and clustering as stronger signals than the presence of one word. Prefer a plainer or more specific alternative only when it improves the sentence.
 
-**Tier 1, high-confidence AI markers:**
+**Tier 1, stronger catalogue signals when vague, repeated, or clustered:**
 delve, tapestry, multifaceted, pivotal, intricate, robust, vibrant, meticulous, nuanced, leverage, foster, navigate, underscore, showcase, ensure, realm, garner, bolster, enduring, elevate, unwavering, testament, journey, landscape, ecosystem, paradigm.
 
 **Tier 2, context-dependent:**
 crucial, key, vital, significant, essential, comprehensive, holistic, seamless, dynamic, innovative, transformative, cutting-edge, state-of-the-art, harness, embrace, embark, dive into, dive deep.
 
-**Tier 3, promotional language (cut especially in marketing or about-page contexts):**
+**Tier 3, promotional language (inspect especially in marketing or about-page contexts):**
 boasts a, nestled in, in the heart of, renowned for, exemplifies, stands as a testament, serves as a reminder, represents a shift, marks a turning point, indelible mark, deeply rooted, rich, profound, enhancing, showcasing, commitment to excellence.
 
-When one of these appears, ask: is there a plainer word that means the same thing? If yes, swap it.
+When one appears, ask whether it is accurate, specific, and natural in context. Suggest a replacement only if a plainer or more precise word improves the passage.
 
 ### Structural tells
 
-**Negative parallelism** ("not X, it's Y") is the most overused AI structure. Cut every instance unless it's a direct quote from a real human source. Examples:
+**Negative parallelism** ("not X, it's Y") is an overused AI structure when it appears mechanically or repeatedly. Flag formulaic instances, but preserve genuine contrasts and deliberate rhetorical phrasing. Examples:
 
 - "It's not [a tool], it's [a thought partner]"
 - "You're not [an X], you're [a Y]"
 - "Not just A, but B"
 - "It's not about A. It's about B."
 
-**Bullet-everything.** A 1-3 sentence answer broken into bullets, or a markdown header used for a paragraph-length response. Convert to flowing prose.
+**Bullet-everything.** A 1-3 sentence answer broken into bullets, or a markdown header used for a paragraph-length response. Suggest flowing prose when the structure is mechanical; keep lists, fragments, and short paragraphs that genuinely improve scanning or rhythm.
 
-**Rule of three.** Adjective triads ("creative, thoughtful, and deeply considered") used for false comprehensiveness. Cut to one or two specific adjectives.
+**Rule of three.** Adjective triads ("creative, thoughtful, and deeply considered") used for false comprehensiveness. Suggest one or two specific adjectives when the third item adds no meaning; keep purposeful triads.
 
-**Outline-style conclusions.** Final paragraphs that read "Despite [challenges], [subject] continues to [vague positive outlook]." Replace with a sharp specific kicker, or no conclusion at all.
+**Outline-style conclusions.** Final paragraphs that read "Despite [challenges], [subject] continues to [vague positive outlook]." Suggest a specific ending, or no conclusion, when the existing one adds no substance.
 
-**Title Case headings** when sentence case is the convention. Convert.
+**Title Case headings** when sentence case is the established convention. Convert only when it conflicts with the document's style.
 
-**Skipping heading levels** (H2 directly to H4 with no H3). Fix the hierarchy.
+**Skipping heading levels** (H2 directly to H4 with no H3). Flag when it reflects a mechanical outline or harms navigation; preserve intentional document structures that remain clear.
 
-**Inline-header lists** (`- **Term:** description` repeated mechanically). Use only for genuine definition lists. Otherwise convert to prose.
+**Inline-header lists** (`- **Term:** description` repeated mechanically). Flag when the pattern feels mechanical; keep genuine definition or reference lists.
 
-**Excessive boldface.** Bolding every key term mechanically. Cap bold at roughly two instances per section, only on phrases the reader needs to find by skimming.
+**Excessive boldface.** Bolding every key term mechanically. Suggest reducing it when the emphasis creates generic visual texture; preserve intentional emphasis and the document's established style.
 
 ### Tone and opener tells
 
-Cut these phrases and the sentences they live in:
+These phrases often create generic assistant texture. Flag them when they are formulaic or unnecessary; preserve deliberate wording that suits the speaker and context:
 
 - "Great question!"
 - "Absolutely!"
@@ -82,71 +92,72 @@ Cut these phrases and the sentences they live in:
 - "Additionally,"
 - "However," used as the opening word of multiple paragraphs.
 
-Test: if the sentence still works without the opener phrase, delete the phrase. If the sentence collapses without it, the sentence is filler, so delete the whole sentence.
+Test: if the sentence works better without the opener, suggest removing it. If the sentence adds no useful meaning, suggest removing or rewriting the sentence. Do not apply this mechanically.
 
 ### Punctuation tells
 
-**Em dash overuse.** More than 2-3 em dashes per 500 words, or em dashes appearing at every clause boundary. Replace most with commas, full stops, or hyphens with spaces. Genuine asides can keep theirs.
+**Em dash overuse.** Frequent em dashes, especially at repeated clause boundaries, can be a signal. Treat the count as a prompt for judgement, not a hard limit. Suggest commas or full stops where they read better, but keep deliberate, useful em dashes.
 
-**Curly quotes** in plain-text or markdown contexts where the surrounding ecosystem uses straight quotes. Convert.
+**Curly quotes** in plain-text or markdown contexts where the surrounding ecosystem consistently uses straight quotes. Suggest conversion for consistency, not because curly quotes are inherently AI-like.
 
-**Knowledge-cutoff disclaimers.** "As of my knowledge cutoff…", "I may not have current information…". Cut from final output.
+**Knowledge-cutoff disclaimers.** "As of my knowledge cutoff…", "I may not have current information…". Flag boilerplate disclaimers that add no value. Preserve necessary, specific warnings about currency or uncertainty.
 
-**Sycophantic openers.** "What a wonderful question!", "I love this prompt!". Cut.
+**Sycophantic openers.** "What a wonderful question!", "I love this prompt!". Suggest removing them when they are formulaic; keep sincere reactions that fit the speaker's established voice.
 
 ### Content and analysis tells
 
-**Vague attribution.** "Many experts say…", "Studies have shown…", "It is widely believed that…". Cite a specific source or delete the claim.
+**Vague attribution.** "Many experts say…", "Studies have shown…", "It is widely believed that…". Suggest a specific source, a more precise statement, or removal of an unsupported claim.
 
-**Superficial -ing analysis.** Clauses that add no information: "highlighting their significance", "emphasizing their role", "underscoring their importance". Cut the whole clause.
+**Superficial -ing analysis.** Clauses that add no information: "highlighting their significance", "emphasizing their role", "underscoring their importance". Suggest removing or replacing the clause with actual analysis.
 
-**Hedge stacking.** "May potentially possibly suggest." Pick the strongest verb that's still accurate.
+**Hedge stacking.** "May potentially possibly suggest." Suggest the strongest wording that remains accurate.
 
-**Filler hedges.** "Somewhat", "relatively", "arguably", "perhaps", "potentially". Cut where the claim still holds. If the claim doesn't hold without the hedge, the claim is too weak. Sharpen or delete.
+**Filler hedges.** "Somewhat", "relatively", "arguably", "perhaps", "potentially". Flag repeated or empty hedging. Keep uncertainty that is factually necessary; otherwise suggest a sharper claim or removal.
 
 ### Era-specific tells (current as of May 2026)
 
-**Active right now:**
+**More common in the current catalogue:**
 
-- Goblin, gremlin, raccoon, troll, ogre, pigeon. OpenAI hard-banned these in May 2025; if they appear, they leaked through.
-- "It's not X, it's Y." Still rampant.
-- Markdown-bullet-everything. Still rampant.
-- "I'd be happy to help" openers. Still rampant.
-- Title Case section headings. Still rampant.
+- Goblin, gremlin, raccoon, troll, ogre, pigeon used as inserted internet whimsy. Flag only when the wording feels generic or out of character, not when the subject or writer naturally calls for it.
+- Repeated "It's not X, it's Y" constructions.
+- Mechanical markdown-bullet-everything.
+- Formulaic "I'd be happy to help" openers.
+- Title Case section headings that conflict with the document's style.
 
-**Mostly trained out:**
+**Less common in the current catalogue:**
 
-- "Delve". Paul Graham's 2024 viral tweet pushed OpenAI to train it down. Now uncommon.
-- Em dashes at every clause boundary. OpenAI shipped a fix in November 2025. Less common but still leak through.
-- "Tapestry". Peak 2023. Now rare.
+- "Delve" used vaguely or repeatedly.
+- Em dashes at nearly every clause boundary.
+- "Tapestry" used as a vague metaphor.
 
 Update this section quarterly against the Wikipedia source. Demote trained-out tells to the second list, but never delete from the catalogue. Tells are cyclical and may return.
 
 ## Workflow
 
-1. **Read the input fully.** Don't skim. Density and combination matter more than any single tell.
-2. **Pass 1, flag.** Walk every category. For each match, note the phrase, the category, and a proposed replacement.
-3. **Pass 2, score.** Estimate tells per 100 words. Above 3 is heavy. Above 6, recommend a rewrite from scratch rather than editing.
-4. **Pass 3, rewrite.** Maintain the writer's intent and voice. Don't substitute one set of AI tells for another.
-5. **Pass 4, self-audit.** Read the rewrite. Ask: what still feels AI? Fix it. Repeat until clean.
+1. **Read the input fully.** Don't skim. Identify its purpose, audience, variant of English, and existing voice. Density and combinations matter more than any single tell.
+2. **Audit.** Use the catalogue to identify contextually relevant tells. Quote or locate the wording, name and briefly explain the category, and suggest what could change.
+3. **Estimate density when useful.** An approximate tells-per-100-words figure can help compare drafts, but it is a heuristic, not a detection score. Describe the texture as light, moderate, or heavy. A heavy result does not determine whether a draft can be revised: explain whether the issues are local or widespread and let the user decide whether to revise or start again.
+4. **Stop after the audit by default.** Do not rewrite unless the user explicitly asks for a rewritten or cleaned-up version.
+5. **Rewrite when requested.** Preserve facts, technical language, intent, voice, language variant, deliberate style, and rhythm. Address the relevant generic texture without substituting a different set of AI tells.
+6. **Self-audit a rewrite.** Check that it remains accurate, natural, and recognisably the same writer. Fix remaining generic texture without polishing away individuality.
 
 ## Output format
 
-Return three blocks:
+For the default audit, return:
 
-**1. Audit.** A bulleted list of every tell flagged. Format: `[category] "exact phrase" → "proposed replacement"`.
+**1. Audit.** A concise list of the relevant tells. For each, include the category, the exact phrase or location, a brief contextual explanation, and a suggested change. Do not flag catalogue items that are natural or necessary in context.
 
-**2. Density score.** "X tells per 100 words. Light / Moderate / Heavy / Unsalvageable."
+**2. Density estimate (optional).** Give an approximate tells-per-100-words figure and describe it as light, moderate, or heavy when that helps the user. Make clear it is not evidence of authorship.
 
-**3. Clean rewrite.** The final version with all tells removed.
+When the user explicitly requests a rewrite, add:
 
-If the input scores Unsalvageable, skip the rewrite and tell the user the draft needs to be redone from a fresh outline rather than edited.
+**3. Cleaner rewrite.** A revised version that addresses the relevant tells while preserving meaning and the writer's actual voice. If the issues are widespread, explain that a fresh draft may be easier, but still let the user decide how to proceed.
 
 ## What this skill does not do
 
-- It does not detect whether a text was AI-generated. AI detectors are unreliable. This skill assumes the input may be AI-assisted and cleans it regardless.
+- It does not detect or prove whether a text was AI-generated. AI detectors are unreliable. It reviews surface-level patterns regardless of authorship.
 - It does not substitute for human editing. It catches surface tells. It cannot detect hollow thinking or missing voice. Those need a human pass.
-- It does not produce style. It produces *absence* of AI style. Pair it with a voice guide for the affirmative side.
+- It does not create a person's voice. It removes generic AI texture while preserving voice already present. Pair it with a genuine personal or brand voice guide when one is available.
 
 ## Source and credit
 
