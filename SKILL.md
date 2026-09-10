@@ -1,20 +1,31 @@
 ---
 name: ai-tells
-description: Reviews drafts for AI writing tells and, when explicitly requested, produces a cleaner rewrite for ChatGPT, Codex, and compatible AI assistants. Use when the user explicitly asks for an AI-tells or de-AI review, such as "check this for AI tells", "does this sound like ChatGPT", "make this less AI-like", "run an AI-tells audit", "remove the AI smell", "humanise this draft", or "is this AI-y". Do not trigger for ordinary editing, polishing, proofreading, improving, rewriting, or writing feedback unless the user also expresses concern about AI-like wording or style.
+description: Reviews drafts for AI writing tells and can audit, rewrite, or create a separate cleaner version for ChatGPT, Codex, and compatible AI assistants. Use when the user explicitly asks for an AI-tells or de-AI review, such as "check this for AI tells", "does this sound like ChatGPT", "make this less AI-like", "run an AI-tells audit", "remove the AI smell", "humanise this draft", or "is this AI-y". When the requested action is unclear, ask whether the user wants an audit only, a rewrite, or a new version that leaves the original unchanged. Do not trigger for ordinary editing, polishing, proofreading, improving, rewriting, or writing feedback unless the user also expresses concern about AI-like wording or style.
 ---
 
 # AI tells
 
-A second-pass checker that flags possible AI writing tells in a draft and can produce a cleaner rewrite when requested. It is intended for ChatGPT, Codex, and compatible AI assistants. The catalogue is compressed from Wikipedia's "Signs of AI writing" page plus the goblin-era 2026 update.
+A second-pass checker that flags possible AI writing tells in a draft and can audit it, rewrite it, or create a separate cleaner version. It is intended for ChatGPT, Codex, and compatible AI assistants. The catalogue is compressed from Wikipedia's "Signs of AI writing" page plus the goblin-era 2026 update.
 
 ## Modes
 
-Two modes:
+Three modes:
 
-1. **Audit (default).** Identify relevant tells, quote or locate the wording, briefly explain the category, and suggest what could change. Include a density estimate when it would help. Do not rewrite the draft.
-2. **Rewrite (only when explicitly requested).** Produce a cleaner version that addresses the relevant tells while preserving meaning, intent, facts, and voice. Requests such as "rewrite it", "clean it up", or "remove those tells" activate this mode.
+1. **Audit only.** Identify relevant tells, quote or locate the wording, briefly explain the category, and suggest what could change. Include a density estimate when it would help. Do not rewrite the draft.
+2. **Rewrite this document.** Rewrite the supplied text or document to address the relevant tells while preserving meaning, intent, facts, and voice. Modify an existing file only when the user explicitly chooses this action or clearly asks to edit or overwrite the original.
+3. **Create a new version.** Make a separate rewritten version and leave the original unchanged. Use a clear versioned filename, preserve the source's format and structure where practical, and verify that the original remains unchanged.
 
-If the user asks only whether a draft sounds AI-like, return the audit. Do not treat an ordinary request to edit, polish, proofread, improve, rewrite, or give writing feedback as an AI-tells request unless the user also mentions AI-like wording or style.
+## Choose the action first
+
+If the prompt clearly requests one of the three modes, proceed without asking. A request to identify, check, review, or audit the tells without changing the text selects **Audit only**. A request to rewrite pasted text selects **Rewrite this document**. A request for a copy, separate file, Version 2, or preservation of the original selects **Create a new version**.
+
+For an existing file, a general request to rewrite, clean up, remove tells, make it less AI-like, or humanise it does not establish whether the original may be changed. If the prompt does not clearly select a mode, ask exactly:
+
+> Would you like me to audit only, rewrite this document, or create a new version and leave the original unchanged?
+
+Wait for the answer, then proceed based on the chosen action. Do not audit, rewrite, or modify a file before the choice is made.
+
+Do not treat an ordinary request to edit, polish, proofread, improve, rewrite, or give writing feedback as an AI-tells request unless the user also mentions AI-like wording or style.
 
 ## Judgement and voice
 
@@ -134,24 +145,25 @@ Update this section quarterly against the Wikipedia source. Demote trained-out t
 
 ## Workflow
 
-1. **Read the input fully.** Don't skim. Identify its purpose, audience, variant of English, and existing voice. Density and combinations matter more than any single tell.
-2. **Audit.** Use the catalogue to identify contextually relevant tells. Quote or locate the wording, name and briefly explain the category, and suggest what could change.
-3. **Estimate density when useful.** An approximate tells-per-100-words figure can help compare drafts, but it is a heuristic, not a detection score. Describe the texture as light, moderate, or heavy. A heavy result does not determine whether a draft can be revised: explain whether the issues are local or widespread and let the user decide whether to revise or start again.
-4. **Stop after the audit by default.** Do not rewrite unless the user explicitly asks for a rewritten or cleaned-up version.
-5. **Rewrite when requested.** Preserve facts, technical language, intent, voice, language variant, deliberate style, and rhythm. Address the relevant generic texture without substituting a different set of AI tells.
-6. **Self-audit a rewrite.** Check that it remains accurate, natural, and recognisably the same writer. Fix remaining generic texture without polishing away individuality.
+1. **Choose the action.** Follow an explicit audit, rewrite, or new-version instruction. If the action is unclear, ask the required question and wait for the user's choice.
+2. **Read the input fully.** Don't skim. Identify its purpose, audience, variant of English, and existing voice. Density and combinations matter more than any single tell.
+3. **Audit.** Use the catalogue to identify contextually relevant tells. Quote or locate the wording, name and briefly explain the category, and suggest what could change. For either rewrite mode, this audit may be internal unless the user also asks to see it.
+4. **Estimate density when useful.** An approximate tells-per-100-words figure can help compare drafts, but it is a heuristic, not a detection score. Describe the texture as light, moderate, or heavy. A heavy result does not determine whether a draft can be revised: explain whether the issues are local or widespread and let the user decide whether to revise or start again.
+5. **Carry out the chosen mode.** Stop after the findings for **Audit only**. For **Rewrite this document**, revise the supplied text or explicitly authorised source file. For **Create a new version**, copy the source, rewrite only the copy, and verify that the original is unchanged.
+6. **Preserve the writer.** In either rewrite mode, preserve facts, technical language, intent, voice, language variant, deliberate style, and rhythm. Address the relevant generic texture without substituting a different set of AI tells.
+7. **Self-audit a rewrite.** Check that it remains accurate, natural, and recognisably the same writer. Fix remaining generic texture without polishing away individuality.
 
 ## Output format
 
-For the default audit, return:
+For **Audit only**, return:
 
 **1. Audit.** A concise list of the relevant tells. For each, include the category, the exact phrase or location, a brief contextual explanation, and a suggested change. Do not flag catalogue items that are natural or necessary in context.
 
 **2. Density estimate (optional).** Give an approximate tells-per-100-words figure and describe it as light, moderate, or heavy when that helps the user. Make clear it is not evidence of authorship.
 
-When the user explicitly requests a rewrite, add:
+For either rewrite mode, produce:
 
-**3. Cleaner rewrite.** A revised version that addresses the relevant tells while preserving meaning and the writer's actual voice. If the issues are widespread, explain that a fresh draft may be easier, but still let the user decide how to proceed.
+**Cleaner rewrite.** A revised version that addresses the relevant tells while preserving meaning and the writer's actual voice. If the user chose **Create a new version**, return the separate version and confirm that the original was left unchanged. If the issues are widespread, explain that a fresh draft may be easier, but still let the user decide how to proceed.
 
 ## What this skill does not do
 
